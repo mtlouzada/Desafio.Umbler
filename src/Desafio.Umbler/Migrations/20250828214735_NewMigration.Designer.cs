@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Desafio.Umbler.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250828180353_AjusteDomainModel")]
-    partial class AjusteDomainModel
+    [Migration("20250828214735_NewMigration")]
+    partial class NewMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

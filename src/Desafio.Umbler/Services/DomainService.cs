@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Desafio.Umbler.Dtos;
 using Desafio.Umbler.Models;
@@ -18,92 +20,110 @@ namespace Desafio.Umbler.Services
     {
         private readonly DatabaseContext _db;
         private readonly LookupClient _lookupClient;
+        private readonly TimeSpan _dnsTimeout = TimeSpan.FromSeconds(5);
+        private readonly TimeSpan _whoisTimeout = TimeSpan.FromSeconds(5);
 
         public DomainService(DatabaseContext db)
         {
             _db = db;
 
-            _lookupClient = new LookupClient(
-                new[]
-                {
-                    System.Net.IPAddress.Parse("8.8.8.8"),
-                    System.Net.IPAddress.Parse("1.1.1.1")
-                })
+            var options = new LookupClientOptions(new[] { IPAddress.Parse("8.8.8.8"), IPAddress.Parse("1.1.1.1") })
             {
-                Timeout = TimeSpan.FromSeconds(5),
+                Timeout = _dnsTimeout,
                 UseCache = true
             };
+
+            _lookupClient = new LookupClient(options);
         }
 
         public async Task<DomainResultDto> GetDomainInfoAsync(string domainName)
         {
-            try
+            Domain domain = await _db.Domains.FirstOrDefaultAsync(d => d.Name == domainName);
+
+            if (domain == null || DateTime.Now.Subtract(domain.UpdatedAt).TotalMinutes > domain.Ttl)
             {
-                var domain = await _db.Domains.FirstOrDefaultAsync(d => d.Name == domainName);
+                var whoisResponse = await ExecuteWithTimeout(
+                    () => WhoisClient.QueryAsync(domainName),
+                    _whoisTimeout,
+                    fallback: null
+                );
 
-                if (domain == null || DateTime.Now.Subtract(domain.UpdatedAt).TotalMinutes > domain.Ttl)
-                {
-                    var whoisResponse = await WhoisClient.QueryAsync(domainName);
+                var aRecordResult = await ExecuteWithTimeout(
+                    () => _lookupClient.QueryAsync(domainName, QueryType.A),
+                    _dnsTimeout,
+                    fallback: null
+                );
 
-                    var result = await _lookupClient.QueryAsync(domainName, QueryType.A);
-                    var record = result.Answers.ARecords().FirstOrDefault();
-                    var ip = record?.Address?.ToString();
+                var record = aRecordResult?.Answers.ARecords().FirstOrDefault();
+                var ip = record?.Address?.ToString();
 
-                    if (ip == null)
-                        return null;
-
-                    var hostResponse = await WhoisClient.QueryAsync(ip);
-
-                    if (domain == null)
+                if (ip == null)
+                    return new DomainResultDto
                     {
-                        domain = new Domain();
-                        _db.Domains.Add(domain);
-                    }
+                        Domain = domainName,
+                        Ip = "Não disponível",
+                        HostedAt = "Desconhecido",
+                        UpdatedAt = DateTime.Now,
+                        Ttl = 60,
+                        NameServers = Array.Empty<string>(),
+                        WhoIs = "Não disponível"
+                    };
 
-                    domain.Name = domainName;
-                    domain.Ip = ip;
-                    domain.WhoIs = whoisResponse?.Raw ?? string.Empty;
-                    domain.HostedAt = hostResponse?.OrganizationName ?? "Desconhecido";
-                    domain.Ttl = record?.TimeToLive ?? 60;
-                    domain.UpdatedAt = DateTime.Now;
+                var hostResponse = await ExecuteWithTimeout(
+                    () => WhoisClient.QueryAsync(ip),
+                    _whoisTimeout,
+                    fallback: null
+                );
 
-                    await _db.SaveChangesAsync();
+                if (domain == null)
+                {
+                    domain = new Domain();
+                    _db.Domains.Add(domain);
                 }
 
-                var nsResult = await _lookupClient.QueryAsync(domainName, QueryType.NS);
-                var nameServers = nsResult.Answers.NsRecords()
-                                    .Select(ns => ns.NSDName.ToString())
-                                    .ToArray();
+                domain.Name = domainName;
+                domain.Ip = ip;
+                domain.WhoIs = whoisResponse?.Raw ?? string.Empty;
+                domain.HostedAt = hostResponse?.OrganizationName ?? "Desconhecido";
+                domain.Ttl = record?.TimeToLive ?? 60;
+                domain.UpdatedAt = DateTime.Now;
 
-                var dto = new DomainResultDto
-                {
-                    Domain = domain.Name,
-                    Ip = domain.Ip,
-                    HostedAt = domain.HostedAt,
-                    UpdatedAt = domain.UpdatedAt,
-                    Ttl = domain.Ttl,
-                    NameServers = nameServers
-                };
+                await _db.SaveChangesAsync();
+            }
 
-                return dto;
-            }
-            catch (DnsResponseException ex)
+            var nsResult = await ExecuteWithTimeout(
+                () => _lookupClient.QueryAsync(domainName, QueryType.NS),
+                _dnsTimeout,
+                fallback: null
+            );
+
+            var nameServers = nsResult?.Answers.NsRecords().Select(ns => ns.NSDName.ToString()).ToArray() ?? Array.Empty<string>();
+
+            return new DomainResultDto
             {
-                return new DomainResultDto
-                {
-                    Domain = domainName,
-                    Ip = "Não disponível",
-                    HostedAt = "Desconhecido",
-                    UpdatedAt = DateTime.Now,
-                    Ttl = 60,
-                    NameServers = Array.Empty<string>(),
-                    WhoIs = $"Erro DNS: {ex.Message}"
-                };
-            }
-            catch (Exception ex)
+                Domain = domain.Name,
+                Ip = domain.Ip,
+                HostedAt = domain.HostedAt,
+                UpdatedAt = domain.UpdatedAt,
+                Ttl = domain.Ttl,
+                NameServers = nameServers,
+                WhoIs = domain.WhoIs
+            };
+        }
+
+        private async Task<T?> ExecuteWithTimeout<T>(Func<Task<T>> func, TimeSpan timeout, T? fallback)
+        {
+            try
             {
-                throw new ApplicationException(
-                    $"Erro ao consultar {domainName}: {ex.Message}", ex);
+                var task = func();
+                var completed = await Task.WhenAny(task, Task.Delay(timeout));
+                if (completed == task)
+                    return await task;
+                return fallback;
+            }
+            catch
+            {
+                return fallback;
             }
         }
     }

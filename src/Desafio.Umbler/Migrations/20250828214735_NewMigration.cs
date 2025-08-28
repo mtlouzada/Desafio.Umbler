@@ -2,11 +2,10 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
 
 namespace Desafio.Umbler.Migrations
 {
-    public partial class AjusteDomainModel : Migration
+    public partial class NewMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

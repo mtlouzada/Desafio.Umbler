@@ -1,29 +1,27 @@
 import { useState } from "react";
-import "./App.css";
+import "./App.scss";
+import { fetchDomain } from "./service/domainService";
+import type { DomainResult } from "./service/domainService";
 
 export default function Home() {
-  const [domain, setDomain] = useState("");
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const [domain, setDomain] = useState<string>("");
+  const [result, setResult] = useState<DomainResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSearch = async (e) => {
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setResult(null);
 
     if (!domain.includes(".")) {
-      setError("Digite um domínio válido. Ex: google.com");
+      setError("Digite um domínio válido. Ex: umbler.com");
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:65453/api/domain/${domain}`);
-      if (!response.ok) {
-        throw new Error(`Erro ${response.status}: ${response.statusText}`);
-      }
-      const data = await response.json();
+      const data: DomainResult = await fetchDomain(domain);
       setResult(data);
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     }
   };
@@ -50,6 +48,9 @@ export default function Home() {
           <p><strong>Servidor:</strong> {result.hostedAt}</p>
           <p><strong>Última atualização:</strong> {new Date(result.updatedAt).toLocaleString()}</p>
           <p><strong>TTL:</strong> {result.ttl}</p>
+          {result.nameServers && result.nameServers.length > 0 && (
+            <p><strong>Name Servers:</strong> {result.nameServers.join(", ")}</p>
+          )}
         </div>
       )}
     </div>

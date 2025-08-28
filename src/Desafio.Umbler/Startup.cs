@@ -1,7 +1,6 @@
 ﻿using System;
 using Desafio.Umbler.Models;
 using Desafio.Umbler.Services;
-using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -37,9 +36,16 @@ namespace Desafio.Umbler
 
             services.AddScoped<IDomainService, DomainService>();
             services.AddControllersWithViews();
-
             services.AddSwaggerGen();
-
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", builder =>
+                {
+                    builder.WithOrigins("http://localhost:5173")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -55,6 +61,8 @@ namespace Desafio.Umbler
 
             app.UseStaticFiles();
             app.UseRouting();
+
+            app.UseCors("AllowFrontend");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
