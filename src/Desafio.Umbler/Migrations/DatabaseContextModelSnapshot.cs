@@ -29,9 +29,11 @@ namespace Desafio.Umbler.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Ip")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("Ttl")

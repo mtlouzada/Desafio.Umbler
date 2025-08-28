@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Desafio.Umbler.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250828091126_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250828180353_AjusteDomainModel")]
+    partial class AjusteDomainModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -31,9 +31,11 @@ namespace Desafio.Umbler.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Ip")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("Ttl")
