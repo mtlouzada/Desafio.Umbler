@@ -7,9 +7,8 @@ namespace Desafio.Umbler.Models
     public class DatabaseContext : DbContext
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
-        : base(options)
+            : base(options)
         {
-
         }
 
         public DbSet<Domain> Domains { get; set; }
@@ -19,11 +18,21 @@ namespace Desafio.Umbler.Models
     {
         [Key]
         public int Id { get; set; }
-        public string Name { get; set; }
-        public string Ip { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public string WhoIs { get; set; }
-        public int Ttl { get; set; }
-        public string HostedAt { get; set; }
+
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        public string Ip { get; set; } = "0.0.0.0";
+
+        [Required]
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+        public string WhoIs { get; set; } = string.Empty;
+
+        [Required]
+        public int Ttl { get; set; } = 60;
+
+        public string HostedAt { get; set; } = "Desconhecido";
     }
 }
