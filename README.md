@@ -115,18 +115,18 @@ Durante o desenvolvimento e refatoração do desafio, foram realizadas as seguin
 - Facilita testes unitários com dados padrão.
 
 - Permite que DomainService e DomainController retornem informações completas sem erros de valores nulos.
-3. **Refatoração do Service (`DomainService`)**
-    - Criado **wrapper para o `WhoisClient`** e injeção de `ILookupClient` para permitir mock durante testes unitários.
-    - Alterado para retornar objetos do tipo `Domain`, mantendo a lógica de persistência e consulta ao banco de dados.
-    - Inclusão de **tratamento de TTL** e atualização de registros antigos no banco de dados.
-4. **Criação de DTO (`DomainResultDto`)**
-    - Separação entre a entidade do banco (`Domain`) e os dados retornados para o front-end.
-    - Melhora na segurança, evitando expor dados desnecessários.
-    - Facilita a manipulação dos dados no frontend (Vite + React).
-5. **Refatoração do Controller (`DomainController`)**
+1. **Refatoração do Controller (`DomainController`)**
     - Controller agora recebe `IDomainService` via injeção de dependência.
     - Map para `DomainResultDto` realizado no controller.
     - Permite fácil mockagem e testes unitários.
+2. **Criação do Service (`DomainService`)**
+    - Criado **wrapper para o `WhoisClient`** e injeção de `ILookupClient` para permitir mock durante testes unitários.
+    - Alterado para retornar objetos do tipo `Domain`, mantendo a lógica de persistência e consulta ao banco de dados.
+    - Inclusão de **tratamento de TTL** e atualização de registros antigos no banco de dados.
+3. **Criação de DTO (`DomainResultDto`)**
+    - Separação entre a entidade do banco (`Domain`) e os dados retornados para o front-end.
+    - Melhora na segurança, evitando expor dados desnecessários.
+    - Facilita a manipulação dos dados no frontend (Vite + React).
     
 ## 2° Frontend
 <img width="1085" height="512" alt="Image" src="https://github.com/user-attachments/assets/b8079ddb-dc23-498e-bd27-24cc385c8d1c" />
@@ -196,4 +196,4 @@ Depois dessa refatoração, esse teste passou a funcionar, mas não é mais aque
 - Execute `dotnet test` na pasta `Desafio.Umbler.Test` para rodar todos os testes unitários.
 
 ---
-fixed :)
+feito :)
