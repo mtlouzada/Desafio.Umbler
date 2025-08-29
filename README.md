@@ -116,9 +116,8 @@ Durante o desenvolvimento e refatoração do desafio, foram realizadas as seguin
 
 - Permite que DomainService e DomainController retornem informações completas sem erros de valores nulos.
 1. **Refatoração do Controller (`DomainController`)**
-    - Controller agora recebe `IDomainService` via injeção de dependência.
-    - Map para `DomainResultDto` realizado no controller.
-    - Permite fácil mockagem e testes unitários.
+    - DomainController foi simplificado: ele apenas valida entrada e retorna HTTP adequado.
+    - Toda a lógica de consultas (DNS, Whois, banco de dados) foi movida para o DomainService, seguindo o padrão de separação de responsabilidades.
 2. **Criação do Service (`DomainService`)**
     - Criado **wrapper para o `WhoisClient`** e injeção de `ILookupClient` para permitir mock durante testes unitários.
     - Alterado para retornar objetos do tipo `Domain`, mantendo a lógica de persistência e consulta ao banco de dados.
