@@ -96,6 +96,7 @@ Se você rodar o projeto e testar um domínio, verá que ele já está funcionan
 Durante o desenvolvimento e refatoração do desafio, foram realizadas as seguintes melhorias:
 
 ## 1° BackEnd
+<img width="1209" height="503" alt="Image" src="https://github.com/user-attachments/assets/c85b3a79-a006-4b78-8f57-2cf43a78171f" />
 
 1. **Migrations**
     - Criação de novas migrations, alinhada com um banco de dados local MySQL e refatoração na connectionstring.
@@ -128,6 +129,7 @@ Durante o desenvolvimento e refatoração do desafio, foram realizadas as seguin
     - Permite fácil mockagem e testes unitários.
     
 ## 2° Frontend
+<img width="1085" height="512" alt="Image" src="https://github.com/user-attachments/assets/b8079ddb-dc23-498e-bd27-24cc385c8d1c" />
     
 1. Substituição  de vanilla JS por **React + TypeScript**.
     
@@ -139,6 +141,7 @@ Durante o desenvolvimento e refatoração do desafio, foram realizadas as seguin
 exibidos de forma legível no frontend.
     
 ## 3° Testes Unitários
+<img width="1115" height="284" alt="Image" src="https://github.com/user-attachments/assets/ea315eac-32e8-4bbd-8ca5-821f71156c9d" />
     
 > OBS: O testa unitário que estava comentado, não estava funcionando naquele formato. Ele dependia do WhoisClient original, que é uma classe estática e não mockável diretamente.
 
@@ -161,7 +164,7 @@ Depois dessa refatoração, esse teste passou a funcionar, mas não é mais aque
         - Domínio inválido.
     - Todos os testes unitários obrigatórios passam, garantindo estabilidade da aplicação.
 
-    ### 5° Extra
+ ## 5° Extra 
 - Criação de um teste unitário específico para domínio inválido, simulando a requisição de um domínio que não existe ou não é válido.
 - Habilitação de **CORS** e configuração de `Swagger` para facilitar testes e documentação da API.
 - Atualização de pacotes NuGet para resolver conflitos de versões do Entity Framework.
