@@ -93,4 +93,101 @@ Se você rodar o projeto e testar um domínio, verá que ele já está funcionan
 
 # Modificações:
 
-- DESCREVA AQUI O OBJETIVO DAS MODIFICAÇÕES...
+Durante o desenvolvimento e refatoração do desafio, foram realizadas as seguintes melhorias:
+
+## 1° BackEnd
+
+1. **Migrations**
+    - Criação de novas migrations, alinhada com um banco de dados local MySQL e refatoração na connectionstring.
+2. **Atualização da pasta Models e impacto**
+
+#### O que foi feito:
+
+- Atualizado o model Domain com valores padrão e [Required] nas propriedades essenciais (Name, Ip, UpdatedAt, Ttl).
+
+- Mantida a chave primária Id e o DbSet<Domain> no DatabaseContext.
+
+#### Impacto:
+
+- Garante integridade e consistência dos dados no banco.
+
+- Facilita testes unitários com dados padrão.
+
+- Permite que DomainService e DomainController retornem informações completas sem erros de valores nulos.
+3. **Refatoração do Service (`DomainService`)**
+    - Criado **wrapper para o `WhoisClient`** e injeção de `ILookupClient` para permitir mock durante testes unitários.
+    - Alterado para retornar objetos do tipo `Domain`, mantendo a lógica de persistência e consulta ao banco de dados.
+    - Inclusão de **tratamento de TTL** e atualização de registros antigos no banco de dados.
+4. **Criação de DTO (`DomainResultDto`)**
+    - Separação entre a entidade do banco (`Domain`) e os dados retornados para o front-end.
+    - Melhora na segurança, evitando expor dados desnecessários.
+    - Facilita a manipulação dos dados no frontend (Vite + React).
+5. **Refatoração do Controller (`DomainController`)**
+    - Controller agora recebe `IDomainService` via injeção de dependência.
+    - Map para `DomainResultDto` realizado no controller.
+    - Permite fácil mockagem e testes unitários.
+    
+## 2° Frontend
+    
+1. Substituição  de vanilla JS por **React + TypeScript**.
+    
+2. Consulta à API via service dedicado (`domainService.ts`).
+    
+3. Validação de entrada do usuário (domínios inválidos não são enviados).
+    
+4. Dados retornados pelo backend são 
+exibidos de forma legível no frontend.
+    
+## 3° Testes Unitários
+    
+> OBS: O testa unitário que estava comentado, não estava funcionando naquele formato. Ele dependia do WhoisClient original, que é uma classe estática e não mockável diretamente.
+
+Para funcionar, foi preciso:
+
+- Criar um wrapper/método mockável para o Whois (IWhoisClientWrapper).
+- Alterar o DomainService e o DomainController para usar a interface mockável em vez da classe estática.
+- Criar o teste usando Mock<IWhoisClientWrapper> retornando um valor fake para o domínio.
+
+Depois dessa refatoração, esse teste passou a funcionar, mas não é mais aquele código comentado, e sim uma versão adaptada usando o service mockado.
+    
+**Porém mesmo adaptado, ele exerce exatamente a mesma função que o teste original comentado**
+    
+---    
+ - Configuração de **InMemoryDatabase** do Entity Framework para testar interações com o banco sem depender de um banco real.
+- Criação de mocks para `IDomainService` e wrappers de Whois/DNS.
+    - Cobertura aumentada para cenários:
+        - Domínio existente no banco.
+        - Domínio inexistente no banco.
+        - Domínio inválido.
+    - Todos os testes unitários obrigatórios passam, garantindo estabilidade da aplicação.
+
+    ### 5° Extra
+- Criação de um teste unitário específico para domínio inválido, simulando a requisição de um domínio que não existe ou não é válido.
+- Habilitação de **CORS** e configuração de `Swagger` para facilitar testes e documentação da API.
+- Atualização de pacotes NuGet para resolver conflitos de versões do Entity Framework.
+- Ajustes para compatibilidade com **.NET 6**.
+
+---
+
+## Como Rodar
+
+### Backend
+
+1. Configure a ConnectionString no `appsettings.json`.
+2. Execute `dotnet build`.
+3. Atualize as Migrations `dotnet ef database update`
+4. Execute `dotnet run` para iniciar o servidor.
+
+### Frontend
+
+1. Entre na pasta `client`.
+2. Execute `pnpm i`.
+3. Execute `pnpm dev` para iniciar o frontend.
+4. Acesse [http://localhost:5173](http://localhost:5173/) (ou porta indicada pelo Vite).
+
+### Testes
+
+- Execute `dotnet test` na pasta `Desafio.Umbler.Test` para rodar todos os testes unitários.
+
+---
+fixed :)
