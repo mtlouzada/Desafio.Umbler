@@ -130,7 +130,8 @@ Durante o desenvolvimento e refatoração do desafio, foram realizadas as seguin
     
 ## 2° Frontend
 <img width="1085" height="512" alt="Image" src="https://github.com/user-attachments/assets/b8079ddb-dc23-498e-bd27-24cc385c8d1c" />
-    
+
+> OBS: Optei por criar o front usando vite + ReactJS em uma pasta diferente, seguindo as recomendações da documentação do ASP.NET. Caso não seja comum para a equipe usar build tools como o vite, também é possível buildar o frontend dentro da pasta Views. Ajustes como esse são de rápida implementação.
 1. Substituição  de vanilla JS por **React + TypeScript**.
     
 2. Consulta à API via service dedicado (`domainService.ts`).
@@ -139,13 +140,15 @@ Durante o desenvolvimento e refatoração do desafio, foram realizadas as seguin
     
 4. Dados retornados pelo backend são 
 exibidos de forma legível no frontend.
+
+> OBS: A escolha do pnpm como gerenciador de pacotes no front foi meramente perfomática, por estar lidando com uma máquina com recursos limitados.
     
 ## 3° Testes Unitários
 <img width="1115" height="284" alt="Image" src="https://github.com/user-attachments/assets/ea315eac-32e8-4bbd-8ca5-821f71156c9d" />
     
 > OBS: O testa unitário que estava comentado, não estava funcionando naquele formato. Ele dependia do WhoisClient original, que é uma classe estática e não mockável diretamente.
 
-Para funcionar, foi preciso:
+_Para funcionar, foi preciso:_
 
 - Criar um wrapper/método mockável para o Whois (IWhoisClientWrapper).
 - Alterar o DomainService e o DomainController para usar a interface mockável em vez da classe estática.
