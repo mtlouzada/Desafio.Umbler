@@ -10,6 +10,6 @@ namespace Desafio.Umbler.Dtos
         public string HostedAt { get; set; } = "Desconhecido";
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public int Ttl { get; set; } = 60;
-        public string WhoIs { get; internal set; }
+        public string WhoIs { get; set; } = string.Empty;
     }
 }
